@@ -6,12 +6,11 @@ import org.example.hospital.entities.Patient;
 import org.example.hospital.repository.PatientRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Controller
 @AllArgsConstructor
@@ -19,7 +18,7 @@ public class PatientController {
 
     private PatientRepository patientRepository;
 
-    @GetMapping("/index")
+    @GetMapping("/user/index")
     public String index(Model model,
                         @RequestParam(name = "page", defaultValue = "0") int page,
                         @RequestParam(name = "size", defaultValue = "4") int size,
@@ -34,46 +33,48 @@ public class PatientController {
         return "patient";
     }
 
-    @GetMapping("/formPatient")
+    @GetMapping("/admin/formPatient")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public String formPatient(Model model) {
         model.addAttribute("patient", new Patient());
-
         return "formPatient";
-
     }
-    @GetMapping("/delete")
+
+    @GetMapping("/admin/delete")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")//proteger coté serveur car masquer 'est proteger cote client
     public String delete(@RequestParam Long id,
                          @RequestParam String keyword,
                          @RequestParam int page) {
         patientRepository.deleteById(id);
-        return "redirect:/index?page=" + page + "&keyword=" + keyword;
+        return "redirect:/user/index?page=" + page + "&keyword=" + keyword;
     }
 
-
-    @GetMapping("/add")
+    @GetMapping("/admin/add")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public String showAddForm(Model model) {
-        model.addAttribute("patient", new Patient()); // Crée un nouvel objet Patient vide
-        return "addpatient"; // Renvoie vers la vue 'add-patient.html'
+        model.addAttribute("patient", new Patient());
+        return "formPatient";
     }
 
-    @PostMapping("/save")
+    @PostMapping("/admin/save")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public String savePatient(Model model, @Valid Patient patient, BindingResult bindingResult) {
-        if(bindingResult.hasErrors()) return "formPatient";
-        patientRepository.save(patient); // Enregistrer le patient dans la base de données
-        return "redirect:/index"; // Rediriger vers la page d'index après l'ajout
+        if (bindingResult.hasErrors()) return "formPatient";
+        patientRepository.save(patient);
+        return "redirect:/user/index";
     }
 
-    @GetMapping("/edit")
-    public String editPatient(@RequestParam Long id, Model model ) {
+    @GetMapping("/admin/edit")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public String editPatient(@RequestParam Long id, Model model) {
         Patient patient = patientRepository.findById(id).orElse(null);
         if (patient == null) throw new RuntimeException("Patient not found");
-
         model.addAttribute("patient", patient);
-        //model.addAttribute("keyword", keyword);
-        //model.addAttribute("pages", page);
-        return "editPatient"; // le même formulaire pour edit
+        return "formPatient";
     }
 
-
-
+    @GetMapping("/")
+    public String home() {
+        return "redirect:/user/index";
+    }
 }

@@ -9,7 +9,7 @@
 
 <div class="p-4">
   <h2 class="mb-3">Ajouter un Patient</h2>
-  <form th:action="@{/save}" th:object="${patient}" method="post">
+  <form th:action="@{/admin/save}" th:object="${patient}" method="post">
     <div class="mb-3">
       <label for="nom" class="form-label">Nom</label>
       <input type="text" th:field="*{nom}" class="form-control" id="nom" required>
