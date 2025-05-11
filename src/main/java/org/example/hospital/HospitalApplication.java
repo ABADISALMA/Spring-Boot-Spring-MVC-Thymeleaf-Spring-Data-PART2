@@ -2,6 +2,7 @@ package org.example.hospital;
 
 import org.example.hospital.entities.Patient;
 import org.example.hospital.repository.PatientRepository;
+import org.example.hospital.security.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -40,7 +41,7 @@ public class HospitalApplication implements CommandLineRunner {
         patientRepository.save(new Patient(null,"Imane",new Date(),true,236));
 
     }
-    @Bean
+    //@Bean
     CommandLineRunner commandLineRunner(JdbcUserDetailsManager jdbcUserDetailsManager) {
         return args -> {
 
@@ -61,6 +62,21 @@ public class HospitalApplication implements CommandLineRunner {
                 jdbcUserDetailsManager.createUser(User.withUsername("admin22").password(passwordEncoder().encode("1234")).roles("ADMIN").build());
 
 
+        };
+    }
+
+    //@Bean
+    CommandLineRunner commandLineRunnerUserDetails(AccountService accountService) {
+        return args -> {
+            accountService.addNewRole("USER");
+            accountService.addNewRole("ADMIN");
+            accountService.addNewUser("user1", "1234", "user1@gamil.com", "1234");
+            accountService.addNewUser("user2", "1234", "user2@gamil.com", "1234");
+            accountService.addNewUser("admin", "1234", "user3@gamil.com",  "1234");
+
+           accountService.addRoleToUser("1", "USER");
+            accountService.addRoleToUser("2", "USER");
+            accountService.addRoleToUser("3", "ADMIN");
         };
     }
     @Bean

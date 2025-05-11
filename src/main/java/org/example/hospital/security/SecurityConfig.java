@@ -1,6 +1,9 @@
 package org.example.hospital.security;
 
+import lombok.AllArgsConstructor;
+import org.example.hospital.security.service.UserDetailServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,13 +21,16 @@ import javax.sql.DataSource;
 
 @Configuration
 @EnableWebSecurity
+@AllArgsConstructor
 @EnableGlobalMethodSecurity(prePostEnabled = true)//pour proteger les route dans le controller
 public class SecurityConfig {
 
-    @Autowired
+    //@Autowired
     private PasswordEncoder passwordEncoder;
+    //@Autowired
+    private UserDetailServiceImpl userDetailServiceImpl;
 
-    @Bean
+    //@Bean
     public JdbcUserDetailsManager jdbcUserDetailsManager(DataSource dataSource) {
         return new JdbcUserDetailsManager(dataSource);
     }
@@ -48,6 +54,7 @@ public class SecurityConfig {
         //httpSecurity.authorizeHttpRequests().requestMatchers("/admin/**").hasRole("ADMIN");
         httpSecurity.authorizeHttpRequests().anyRequest().authenticated();//une seule authentification pour toutes les requetes
         httpSecurity.exceptionHandling().accessDeniedPage("/accessDenied");
+        httpSecurity.userDetailsService(userDetailServiceImpl);
         return httpSecurity.build();
     }
 }
